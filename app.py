@@ -21,5 +21,5 @@ app.layout = html.Div(
         html.H1("Gender Wage Gap study using \n the 2019 General Social Survey")
     ])
 
-if __name__ == '__main__':
+if __name__=='__main__':
     app.run_server(debug=True)
