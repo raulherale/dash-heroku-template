@@ -57,6 +57,26 @@ gss_display = round(gss_display, 2)
 table = ff.create_table(gss_display)
 
 gss_clean['income'] = round(gss_clean['income'],2)
+
+gss_clean['male_breadwinner'] = gss_clean['male_breadwinner'].astype('category')
+gss_clean['male_breadwinner'] = gss_clean['male_breadwinner'].cat.reorder_categories(['strongly agree', 
+                                                            'agree', 
+                                                            'disagree', 
+                                                            'strongly disagree'])
+
+gss_groupbar = gss_clean.groupby(['sex','male_breadwinner']).size().reset_index().rename({0:'Count'}, axis=1)
+
+fig2 = px.bar(gss_groupbar, x='sex', y='Count', color='male_breadwinner',
+            labels={'male_breadwinner':'Male breadwinner', 'Count':'Count','sex':'Gender'},
+            hover_data = ['male_breadwinner', 'Count'],
+            text='Count',
+            barmode = 'group')
+fig2.update_layout(showlegend=True)
+fig2.update(layout=dict(title=dict(x=0.5)))
+
+
+
+
 fig3 = px.scatter(gss_clean, x='job_prestige', y='income', color = 'sex',
                   trendline='ols',
                  height=600, width=600,
@@ -103,6 +123,7 @@ col_options = ['satjob', 'relationship', 'male_breadwinner', 'men_bettersuited',
 
 group_options = ['sex','region','education']
 
+
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div(
@@ -112,28 +133,8 @@ app.layout = html.Div(
         html.H1("Summary"),
         dcc.Graph(figure=table),
         
-        html.Div([
-            
-            html.H3("Category"),
-            
-            dcc.Dropdown(id='category',
-                            options=[{'label': i, 'value': i} for i in col_options],
-                            value='male_breadwinner'),
-            
-            html.H3("Grouped By"),
-            
-            dcc.Dropdown(id='group',
-                            options=[{'label': i, 'value': i} for i in group_options],
-                            value='region'),
-        
-        ], style={'width': '25%', 'float': 'left'}),
-
-
-        html.Div([
-            
-            dcc.Graph(id="graph")
-        
-        ], style={'width': '70%', 'float': 'right'}),
+        html.H2("Survey responses on if males are breadwinners or not"),
+        dcc.Graph(figure=fig2),
         
         html.H2("Income vs Occupational Prestige by Gender"),
         dcc.Graph(figure=fig3),
@@ -164,23 +165,5 @@ app.layout = html.Div(
     ]
 )
 
-@app.callback(Output(component_id="graph",component_property="figure"), 
-             [Input(component_id='category',component_property="value"),
-              Input(component_id='group',component_property="value")])
-
-def make_figure(x, y):
-    gss_group = gss_clean.groupby([y,x]).size().reset_index().rename({0:'Count'}, axis=1)
-
-    return px.bar(
-        gss_group,
-        x=y,
-        y='Count',
-        color=x,
-        hover_data=[x,'Count'],
-        barmode = 'group')
-
-
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
