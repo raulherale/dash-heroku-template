@@ -13,7 +13,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import dash
-from jupyter_dash import JupyterDash
+
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
@@ -239,4 +239,4 @@ def make_figure(x, y):
 
 
 if __name__ =='__main__':
-    app.run_server(debug = True )     
+    app.run_server(debug = True , port=8051, host='0.0.0.0'  )     
